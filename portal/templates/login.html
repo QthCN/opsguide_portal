@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>OGP管理平台</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="{{url_for('static', filename='css/bootstrap.min.css')}}" rel="stylesheet">
+    <link href="{{url_for('static', filename='css/signin.css')}}" rel="stylesheet">
+  </head>
+
+  <body>
+
+    <div class="container">
+
+      <form class="form-signin" action="login.html" method="post">
+        <h2 class="form-signin-heading">请登陆:</h2>
+        <label for="inputName" class="sr-only">用户名</label>
+        <input type="text" id="inputName" name="inputName" class="form-control" placeholder="用户名" required autofocus>
+        <label for="inputPassword" class="sr-only">密码</label>
+        <input type="password" id="inputPassword" name="inputPassword" class="form-control" placeholder="密码" required>
+        <button class="btn btn-lg btn-primary btn-block" type="submit" onclick="this.form.submit()">登陆</button>
+
+          <div style="display: none">
+              <input type="text" id="from_url" name="from_url" value="{{from_url}}">/</input>
+          </div>
+
+      </form>
+
+    </div> <!-- /container -->
+  </body>
+</html>
