@@ -93,11 +93,6 @@ def before_run(possible_topdir, conf_dir="etc",
     def page_not_found(error):
         return render_template('404.html'), 404
 
-    # set 500 page
-    @app.errorhandler(500)
-    def internal_error(error):
-        return render_template('500.html'), 500
-
     return app
 
 

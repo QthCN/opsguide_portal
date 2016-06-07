@@ -14,6 +14,7 @@
 # limitations under the License.
 
 # THIS FILE IS MANAGED BY THE GLOBAL REQUIREMENTS REPO - DO NOT EDIT
+import os
 import setuptools
 
 # In python < 2.7.4, a lazy loading of package `pbr` will break
@@ -23,6 +24,20 @@ try:
     import multiprocessing  # noqa
 except ImportError:
     pass
+
+
+def build_protobuf():
+    print('build protobuf files now.')
+    protobuf_dir = './protobuf'
+    protobuf_file = '{0}/ogp_msg.proto'.format(protobuf_dir)
+    cmd = 'protoc -I={src_dir} --python_out=portal/protobuf {src_file}'.format(
+        src_dir=protobuf_dir,
+        src_file=protobuf_file
+    )
+    rc = os.system(cmd)
+    assert rc == 0
+
+build_protobuf()
 
 setuptools.setup(
     setup_requires=['pbr>=1.3'],

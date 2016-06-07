@@ -20,6 +20,11 @@ FILE_OPTIONS = {
                     default=True,
                     help='Run in debug mode.')
     ],
+    'controller': [
+        cfg.StrOpt('address',
+                   default='127.0.0.1:9900',
+                   help='OGP Controller address.')
+    ],
 }
 
 

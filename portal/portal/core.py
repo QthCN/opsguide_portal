@@ -6,6 +6,8 @@ from oslo_config import cfg
 
 from portal.auth import except_wrap, login_required
 
+from portal.protobuf.proxy import ProtobufProxy
+
 LOG = log.getLogger(__name__)
 CONF = cfg.CONF
 
@@ -19,4 +21,5 @@ portal_page = Blueprint('portal_page', __name__,
 @except_wrap
 @login_required
 def show_homepage():
+    ProtobufProxy().list_applications()
     return render_template('base.html', resource_class='overview')
