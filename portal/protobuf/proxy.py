@@ -22,5 +22,5 @@ class ProtobufProxy(object):
             'PO_PORTAL_GET_APPS_REQ')
         applications_list = msg.ControllerApplicationsList()
         applications_list.ParseFromString(msg_data)
-        
+
 
