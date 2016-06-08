@@ -18,8 +18,7 @@ class ProtobufProxy(object):
         self.__service = Service()
 
     def list_applications(self):
-        msg_type, msg_data = self.__service.send_msg(
-            'PO_PORTAL_GET_APPS_REQ')
+        msg_type, msg_data = self.__service.send_msg('PO_PORTAL_GET_APPS_REQ')
         applications_list = msg.ControllerApplicationsList()
         applications_list.ParseFromString(msg_data)
 
