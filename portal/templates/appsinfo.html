@@ -1,0 +1,27 @@
+{%extends "base.html"%}
+{%block title%}应用信息{%endblock%}
+{%block js%}{%endblock%}
+{%block content%}
+<table class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th class="col-md-1">id</th>
+            <th class="col-md-2">名称</th>
+            <th class="col-md-1">来源</th>
+            <th class="col-md-6">描述</th>
+            <th class="col-md-2">操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        {%for app in applications.applications%}
+            <tr>
+                <td>{{app.id}}</td>
+                <td>{{app.name}}</td>
+                <td>{{app.source}}</td>
+                <td>{{app.description}}</td>
+                <td><a href="/appsinfo/{{app.id}}/versions.html">版本信息</a></td>
+            </tr>
+        {%endfor%}
+    </tbody>
+</table>
+{%endblock%}

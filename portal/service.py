@@ -18,9 +18,11 @@ CONF = cfg.CONF
 MSG_TYPE = {
     # controller
     'CT_PORTAL_GET_APPS_RES': 3,
+    'CT_PORTAL_GET_AGENTS_RES': 5,
 
     # portal
     'PO_PORTAL_GET_APPS_REQ': 9000,
+    'PO_PORTAL_GET_AGENTS_REQ': 9001,
 }
 
 

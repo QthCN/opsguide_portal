@@ -1,0 +1,25 @@
+{%extends "base.html"%}
+{%block title%}应用信息<small> 版本信息</small>{%endblock%}
+{%block js%}{%endblock%}
+{%block content%}
+<table class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th class="col-md-1">id</th>
+            <th class="col-md-2">版本</th>
+            <th class="col-md-2">注册时间</th>
+            <th class="col-md-7">描述</th>
+        </tr>
+    </thead>
+    <tbody>
+        {%for v in versions%}
+            <tr>
+                <td>{{v.id}}</td>
+                <td>{{v.version}}</td>
+                <td>{{v.registe_time}}</td>
+                <td>{{v.description}}</td>
+            </tr>
+        {%endfor%}
+    </tbody>
+</table>
+{%endblock%}

@@ -7,3 +7,7 @@ class AuthFailedException(Exception):
 
 class RPCFailedException(Exception):
     """和Controller交互出错"""
+
+
+class RPCContentException(Exception):
+    """Controller处理消息异常"""
