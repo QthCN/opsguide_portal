@@ -5,6 +5,7 @@ from oslo_log import log
 from oslo_config import cfg
 
 from portal.auth import except_wrap, login_required
+from portal.common.utils import convert_unix_timestamp_to_datetime_str
 from portal.exceptions import RPCContentException
 from portal.protobuf.proxy import ProtobufProxy
 
@@ -57,3 +58,46 @@ def show_appsinfo_versions_page(app_id):
             break
     return render_template('appsinfo_versions.html', resource_class='appsinfo',
                            versions=versions)
+
+
+@portal_page.route('/agentsinfo.html', methods=['GET'])
+@except_wrap
+@login_required
+def show_agentsinfo_page():
+    agents = ProtobufProxy().list_agents()
+    __check_rpc_status(agents, 'ProtobufProxy().list_agents()')
+    agents_parsed_data = []
+    for agent in agents.agents:
+        a = dict()
+        a['type'] = agent.type
+        a['ip'] = agent.ip
+        if agent.has_sess == 0:
+            a['has_sess'] = '是'
+        else:
+            a['has_sess'] = '否'
+        a['last_sync_db_time'] = convert_unix_timestamp_to_datetime_str(
+            agent.last_sync_db_time)
+        a['last_heartbeat_time'] = convert_unix_timestamp_to_datetime_str(
+            agent.last_heartbeat_time)
+        a['last_sync_time'] = convert_unix_timestamp_to_datetime_str(
+            agent.last_sync_time)
+        a['applications_size'] = len(agent.applications)
+        agents_parsed_data.append(a)
+    return render_template('agentsinfo.html', resource_class='agentsinfo',
+                           agents=agents_parsed_data)
+
+
+@portal_page.route('/agentsinfo/<ip>/applications.html', methods=['GET'])
+@except_wrap
+@login_required
+def show_agentsinfo_applications_page(ip):
+    agents = ProtobufProxy().list_agents()
+    __check_rpc_status(agents, 'ProtobufProxy().list_agents()')
+    applications = []
+    for agent in agents.agents:
+        if agent.ip == ip:
+            applications = agent.applications
+            break
+    return render_template('agentsinfo_applications.html',
+                           resource_class='agentsinfo',
+                           applications=applications)

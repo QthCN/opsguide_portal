@@ -1,0 +1,33 @@
+{%extends "base.html"%}
+{%block title%}代理信息{%endblock%}
+{%block js%}{%endblock%}
+{%block content%}
+<table class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th class="col-md-1">类型</th>
+            <th class="col-md-1">主机IP</th>
+            <th class="col-md-1">是否关联sess</th>
+            <th class="col-md-2">最近DB同步时间</th>
+            <th class="col-md-2">最近心跳同步时间</th>
+            <th class="col-md-2">最近状态同步时间</th>
+            <th class="col-md-1">绑定应用数</th>
+            <th class="col-md-2">操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        {%for agent in agents%}
+            <tr>
+                <td>{{agent['type']}}</td>
+                <td>{{agent['ip']}}</td>
+                <td>{{agent['has_sess']}}</td>
+                <td>{{agent['last_sync_db_time']}}</td>
+                <td>{{agent['last_heartbeat_time']}}</td>
+                <td>{{agent['last_sync_time']}}</td>
+                <td>{{agent['applications_size']}}</td>
+                <td><a href="/agentsinfo/{{agent['ip']}}/applications.html">应用信息</a></td>
+            </tr>
+        {%endfor%}
+    </tbody>
+</table>
+{%endblock%}

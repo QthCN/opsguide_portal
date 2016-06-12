@@ -1,0 +1,25 @@
+{%extends "base.html"%}
+{%block title%}代理信息<small> 应用信息</small>{%endblock%}
+{%block js%}{%endblock%}
+{%block content%}
+<table class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th class="col-md-2">绑定ID</th>
+            <th class="col-md-2">应用ID</th>
+            <th class="col-md-4">应用名称</th>
+            <th class="col-md-4">应用版本</th>
+        </tr>
+    </thead>
+    <tbody>
+        {%for app in applications%}
+            <tr>
+                <td>{{app.uniq_id}}</td>
+                <td>{{app.app_id}}</td>
+                <td>{{app.app_name}}</td>
+                <td>{{app.app_version}}</td>
+            </tr>
+        {%endfor%}
+    </tbody>
+</table>
+{%endblock%}
