@@ -1,0 +1,93 @@
+{%extends "base.html"%}
+{%block title%}发布管理{%endblock%}
+{%block third_js%}
+<script src="{{url_for('static', filename='js/bootbox.min.js')}}"></script>
+{%endblock%}
+{%block js%}
+function do_publish() {
+    var request_json = $('#publish_input_json').val();
+    $.post('/pubmgr/publish', {request_json: request_json})
+     .done(function(result) {
+               result = JSON.parse(result);
+               if (result.rc==0) {
+                   window.location.href='/pubmgr.html';
+               } else {
+                   alert(result.msg);
+               }
+           })
+     .fail(
+         function() {
+            alert('请求发生错误，请重试或联系管理员排查');
+         }
+     );
+}
+
+function confirm_remove(uniq_id) {
+    bootbox.confirm("确定要下线该版本?", function(result) {
+        if (result) {
+            $.post('/pubmgr/remove/' + uniq_id, {})
+                 .done(function(result) {
+                           result = JSON.parse(result);
+                           if (result.rc==0) {
+                               window.location.href='/pubmgr.html';
+                           } else {
+                               alert(result.msg);
+                           }
+                       })
+                 .fail(
+                     function() {
+                        alert('请求发生错误，请重试或联系管理员排查');
+                     }
+                 );
+        }
+    });
+}
+{%endblock%}
+
+{%block content%}
+<ul class="nav nav-tabs">
+  <li role="presentation" class="active"><a data-toggle="tab" href="#list">容器列表</a></li>
+  <li role="presentation"><a data-toggle="tab" href="#publish">发布</a></li>
+</ul>
+
+<div id="tab-content" class="tab-content">
+    <div class="tab-pane active" id="list">
+        <br/>
+        <table class="table table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th class="col-md-1">DA</th>
+                    <th class="col-md-2">应用名</th>
+                    <th class="col-md-2">版本</th>
+                    <th class="col-md-2">运行时名</th>
+                    <th class="col-md-2">状态</th>
+                    <th class="col-md-3">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {%for a in applications_parsed_data%}
+                    <tr>
+                        <td>{{a.agent_ip}}</td>
+                        <td>{{a.app_name}}</td>
+                        <td>{{a.app_version}}</td>
+                        <td>{{a.runtime_name}}</td>
+                        <td>{{a.status}}</td>
+                        <td><a href="javascript:void(0)" onclick="confirm_remove({{a.uniq_id}})">下线</a> | <a href="/pubmgr/{{a.uniq_id}}/upgrade">升级</a></td>
+                    </tr>
+                {%endfor%}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="tab-pane" id="publish">
+        <br/>
+        <form>
+          <div class="form-group">
+            <label for="publish_input_json">请求JSON</label>
+            <textarea class="form-control" id="publish_input_json" rows="20"></textarea>
+          </div>
+        </form>
+        <button class="btn btn-default" onclick="do_publish()">发布</button>
+    </div>
+</div>
+{%endblock%}

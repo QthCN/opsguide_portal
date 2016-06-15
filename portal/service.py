@@ -2,6 +2,7 @@
 
 import socket
 import struct
+import time
 
 from oslo_log import log
 from oslo_config import cfg
@@ -19,10 +20,14 @@ MSG_TYPE = {
     # controller
     'CT_PORTAL_GET_APPS_RES': 3,
     'CT_PORTAL_GET_AGENTS_RES': 5,
+    'CT_PORTAL_PUBLISH_APP_RES': 6,
+    'CT_PORTAL_REMOVE_APPVER_RES': 7,
 
     # portal
     'PO_PORTAL_GET_APPS_REQ': 9000,
     'PO_PORTAL_GET_AGENTS_REQ': 9001,
+    'PO_PORTAL_PUBLISH_APP_REQ': 9002,
+    'PO_PORTAL_REMOVE_APPVER_REQ': 9003,
 }
 
 
@@ -73,6 +78,9 @@ class Service(object):
                 # 接收数据
                 msg = bytes()
                 size_handled = False
+                begin_timestamp = time.time()
+                # 接下来的读取操作超时时间为5秒
+                sock.settimeout(5)
                 while True:
                     data = sock.recv(1024)
                     msg += data

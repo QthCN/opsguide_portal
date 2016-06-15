@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import json
+
 from flask import Blueprint, render_template, request, session, redirect
 from oslo_log import log
 from oslo_config import cfg
@@ -22,9 +24,17 @@ def __check_rpc_status(obj, item):
         LOG.error("{0} error, rc: {1}, msg: {2}".format(
             item,
             obj.header.rc,
-            obj.header.msg
+            obj.header.message
         ))
-        raise RPCContentException
+        raise RPCContentException(obj.header.message)
+
+
+def gen_result(data=None, rc=0, msg=""):
+    return json.dumps(dict(
+        data=data,
+        rc=rc,
+        msg=msg
+    ))
 
 
 @portal_page.route('/', methods=['GET'])
@@ -101,3 +111,91 @@ def show_agentsinfo_applications_page(ip):
     return render_template('agentsinfo_applications.html',
                            resource_class='agentsinfo',
                            applications=applications)
+
+
+@portal_page.route('/pubmgr.html', methods=['GET'])
+@except_wrap
+@login_required
+def show_pubmgr_page():
+    agents = ProtobufProxy().list_agents()
+    __check_rpc_status(agents, 'ProtobufProxy().list_agents()')
+    applications_parsed_data = []
+    for agent in agents.agents:
+        for app in agent.applications:
+            a = dict()
+            a['agent_type'] = agent.type
+            a['agent_ip'] = agent.ip
+            if agent.has_sess == 0:
+                a['agent_has_sess'] = '是'
+            else:
+                a['agent_has_sess'] = '否'
+            a['agent_last_sync_db_time'] = \
+                convert_unix_timestamp_to_datetime_str(agent.last_sync_db_time)
+            a['agent_last_heartbeat_time'] = \
+                convert_unix_timestamp_to_datetime_str(
+                    agent.last_heartbeat_time)
+            a['agent_last_sync_time'] = \
+                convert_unix_timestamp_to_datetime_str(
+                    agent.last_sync_time)
+            a['agent_applications_size'] = len(agent.applications)
+
+            a['app_name'] = app.app_name
+            a['app_version'] = app.app_version
+            a['app_id'] = app.app_id
+            a['uniq_id'] = app.uniq_id
+            a['runtime_name'] = app.runtime_name
+            a['status'] = app.status
+            applications_parsed_data.append(a)
+            applications_parsed_data = sorted(applications_parsed_data,
+                                              key=lambda x: x['agent_ip'])
+    return render_template('pubmgr.html', resource_class='pubmgr',
+                           applications_parsed_data=applications_parsed_data)
+
+
+@portal_page.route('/pubmgr/publish', methods=['POST'])
+@except_wrap
+@login_required
+def do_publish():
+    request_json = request.form.get('request_json', None)
+
+    try:
+        request_data = json.loads(request_json)
+    except Exception as e:
+        LOG.exception(e)
+        return gen_result(rc=1, msg="invalid json")
+
+    try:
+        publish_result = ProtobufProxy().publish_app(
+            request_data.get('app_id', -1),
+            request_data.get('app_version', ''),
+            request_data.get('runtime_name', ''),
+            request_data.get('app_cfg', None),
+            request_data.get('hints', None)
+        )
+        __check_rpc_status(publish_result, 'ProtobufProxy().publish_app()')
+    except TypeError as e:
+        LOG.exception(e)
+        return gen_result(rc=1, msg="JSON content error")
+    except RPCContentException as e:
+        LOG.exception(e)
+        return gen_result(rc=1, msg=e.args[0])
+    except Exception as e:
+        LOG.exception(e)
+        return gen_result(rc=1, msg="RPC error")
+    return gen_result()
+
+
+@portal_page.route('/pubmgr/remove/<uniq_id>', methods=['POST'])
+@except_wrap
+@login_required
+def do_remove(uniq_id):
+    try:
+        publish_result = ProtobufProxy().remove_version(int(uniq_id))
+        __check_rpc_status(publish_result, 'ProtobufProxy().remove_version()')
+    except RPCContentException as e:
+        LOG.exception(e)
+        return gen_result(rc=1, msg=e.args[0])
+    except Exception as e:
+        LOG.exception(e)
+        return gen_result(rc=1, msg="RPC error")
+    return gen_result()

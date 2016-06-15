@@ -29,4 +29,53 @@ class ProtobufProxy(object):
         agents_list.ParseFromString(msg_data)
         return agents_list
 
+    def publish_app(self, app_id, app_version, runtime_name,
+                    app_cfg=None, hints=None):
+        publish_app_req = msg.PublishAppReq()
+        publish_app_req.app_id = app_id
+        publish_app_req.app_version = app_version
+        publish_app_req.runtime_name = runtime_name
+
+        if app_id == -1 or app_version == '' or runtime_name == '':
+            raise TypeError()
+
+        if hints is not None:
+            if 'da_ip' in hints:
+                publish_app_req.hints.da_ip = hints['da_ip']
+
+        if app_cfg is not None:
+            if 'ports' in app_cfg:
+                for port in app_cfg['ports']:
+                    port_ = publish_app_req.app_cfg.ports.add()
+                    port_.private_port = port['private_port']
+                    port_.public_port = port['public_port']
+                    port_.type = port['type']
+            if 'volumes' in app_cfg:
+                for volume in app_cfg['volumes']:
+                    volume_ = publish_app_req.app_cfg.volumes.add()
+                    volume_.docker_volume = volume['docker_volume']
+                    volume_.host_volume = volume['host_volume']
+            if 'dns' in app_cfg:
+                for dns in app_cfg['dns']:
+                    dns_ = publish_app_req.app_cfg.dns.add()
+                    dns_.dns = dns['dns']
+                    dns_.address = dns['address']
+            if 'extra_cmd' in app_cfg:
+                publish_app_req.app_cfg.extra_cmd = app_cfg['extra_cmd']
+
+        msg_type, msg_data = self.__s.send_msg(
+            'PO_PORTAL_PUBLISH_APP_REQ', publish_app_req)
+        publish_app_res = msg.PublishAppRes()
+        publish_app_res.ParseFromString(msg_data)
+        return publish_app_res
+
+    def remove_version(self, uniq_id):
+        remove_ver_req = msg.RemoveAppVerReq()
+        remove_ver_req.uniq_id = uniq_id
+        msg_type, msg_data = self.__s.send_msg(
+            'PO_PORTAL_REMOVE_APPVER_REQ', remove_ver_req)
+        remove_ver_res = msg.RemoveAppVerRes()
+        remove_ver_res.ParseFromString(msg_data)
+        return remove_ver_res
+
 
