@@ -117,6 +117,16 @@ def show_agentsinfo_applications_page(ip):
 @except_wrap
 @login_required
 def show_pubmgr_page():
+    applications = ProtobufProxy().list_applications()
+    __check_rpc_status(applications, 'ProtobufProxy().list_applications()')
+    app_versions = dict()
+    for app in applications.applications:
+        if app.name not in app_versions:
+            app_versions[app.name] = []
+        for ver in app.versions:
+            app_versions[app.name].append(ver.version)
+    app_versions = json.dumps(app_versions)
+
     agents = ProtobufProxy().list_agents()
     __check_rpc_status(agents, 'ProtobufProxy().list_agents()')
     applications_parsed_data = []
@@ -149,7 +159,8 @@ def show_pubmgr_page():
             applications_parsed_data = sorted(applications_parsed_data,
                                               key=lambda x: x['agent_ip'])
     return render_template('pubmgr.html', resource_class='pubmgr',
-                           applications_parsed_data=applications_parsed_data)
+                           applications_parsed_data=applications_parsed_data,
+                           app_versions=app_versions)
 
 
 @portal_page.route('/pubmgr/publish', methods=['POST'])
@@ -192,6 +203,25 @@ def do_remove(uniq_id):
     try:
         publish_result = ProtobufProxy().remove_version(int(uniq_id))
         __check_rpc_status(publish_result, 'ProtobufProxy().remove_version()')
+    except RPCContentException as e:
+        LOG.exception(e)
+        return gen_result(rc=1, msg=e.args[0])
+    except Exception as e:
+        LOG.exception(e)
+        return gen_result(rc=1, msg="RPC error")
+    return gen_result()
+
+
+@portal_page.route('/pubmgr/upgrade/<uniq_id>', methods=['POST'])
+@except_wrap
+@login_required
+def do_upgrade(uniq_id):
+    try:
+        version = request.form.get('new_version', '')
+        runtime_name = request.form.get('runtime_name', '')
+        publish_result = ProtobufProxy().upgrade_version(
+            int(uniq_id), version, runtime_name)
+        __check_rpc_status(publish_result, 'ProtobufProxy().upgrade_version()')
     except RPCContentException as e:
         LOG.exception(e)
         return gen_result(rc=1, msg=e.args[0])

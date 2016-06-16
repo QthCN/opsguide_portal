@@ -78,4 +78,16 @@ class ProtobufProxy(object):
         remove_ver_res.ParseFromString(msg_data)
         return remove_ver_res
 
+    def upgrade_version(self, uniq_id, version, runtime_name):
+        upgrade_ver_req = msg.UpgradeAppVerReq()
+        upgrade_ver_req.old_ver_uniq_id = uniq_id
+        upgrade_ver_req.new_version = version
+        upgrade_ver_req.runtime_name = runtime_name
+        msg_type, msg_data = self.__s.send_msg(
+            'PO_PORTAL_UPGRADE_APPVER_REQ', upgrade_ver_req)
+        upgrade_ver_res = msg.UpgradeAppVerRes()
+        upgrade_ver_res.ParseFromString(msg_data)
+        return upgrade_ver_res
+
+
 

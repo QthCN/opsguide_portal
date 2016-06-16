@@ -1,5 +1,7 @@
 {%extends "base.html"%}
 {%block title%}发布管理{%endblock%}
+{%block third_css%}
+{%endblock%}
 {%block third_js%}
 <script src="{{url_for('static', filename='js/bootbox.min.js')}}"></script>
 {%endblock%}
@@ -42,6 +44,63 @@ function confirm_remove(uniq_id) {
         }
     });
 }
+
+app_versions = {{app_versions | safe}}
+
+function get_confirm_upgrade_msg(app_name) {
+    html = '版本:<select id="upgrade_version">';
+    app_versions[app_name].forEach(function(v) {
+            html += '<option value="' + v + '">';
+            html += v;
+            html += '</option>';
+        });
+    html += '</select>';
+    html += '<br/><br/>'
+    html += '运行时名称:<input type="text" id="upgrade_runtime_name"></text>'
+    return html;
+}
+
+function do_upgrade(uniq_id) {
+    var version = $('#upgrade_version').val();
+    var runtime_name = $('#upgrade_runtime_name').val();
+    $.post('/pubmgr/upgrade/' + uniq_id, {new_version:version, runtime_name:runtime_name})
+         .done(function(result) {
+                   result = JSON.parse(result);
+                   if (result.rc==0) {
+                       window.location.href='/pubmgr.html';
+                   } else {
+                       alert(result.msg);
+                   }
+               })
+         .fail(
+             function() {
+                alert('请求发生错误，请重试或联系管理员排查');
+             }
+         );
+}
+
+function confirm_upgrade(app_name, uniq_id) {
+    bootbox.dialog({
+        title: "请提供目标版本及新的运行时名称",
+        message: get_confirm_upgrade_msg(app_name),
+        buttons: {
+            close: {
+              label: "Cancel",
+              callback: function() {
+
+              }
+            },
+            submit: {
+              label: "OK",
+              className: "btn-primary",
+              callback: function() {
+                do_upgrade(uniq_id);
+              }
+            }
+        }
+    });
+}
+
 {%endblock%}
 
 {%block content%}
@@ -72,7 +131,7 @@ function confirm_remove(uniq_id) {
                         <td>{{a.app_version}}</td>
                         <td>{{a.runtime_name}}</td>
                         <td>{{a.status}}</td>
-                        <td><a href="javascript:void(0)" onclick="confirm_remove({{a.uniq_id}})">下线</a> | <a href="/pubmgr/{{a.uniq_id}}/upgrade">升级</a></td>
+                        <td><a href="javascript:void(0)" onclick="confirm_remove({{a.uniq_id}})">下线</a> | <a href="javascript:void(0)" onclick="confirm_upgrade('{{a.app_name}}', {{a.uniq_id}})">升级(回滚)</a></td>
                     </tr>
                 {%endfor%}
             </tbody>
