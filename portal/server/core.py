@@ -10,7 +10,7 @@ import pbr.version
 
 from portal import config
 from portal.login.core import login_page
-from portal.portal.core import portal_page
+from portal.www.core import portal_page
 
 CONF = cfg.CONF
 
