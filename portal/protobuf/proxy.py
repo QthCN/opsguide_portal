@@ -89,5 +89,55 @@ class ProtobufProxy(object):
         upgrade_ver_res.ParseFromString(msg_data)
         return upgrade_ver_res
 
+    def add_service(self, app_id, service_type,
+                    # service_type == PORT_SERVICE
+                    service_port=None, private_port=None):
+        add_service_req = msg.AddServiceReq()
+        if service_type == 'PORT_SERVICE':
+            if service_port is None:
+                raise TypeError("service_port is None")
+            add_service_req.app_id = app_id
+            add_service_req.service_type = 'PORT_SERVICE'
+            add_service_req.port_service_body.service_port = int(service_port)
+            if private_port is not None:
+                add_service_req.port_service_body.private_port = \
+                    int(private_port)
+        else:
+            LOG.error("{0} is invalid".format(service_type))
+            raise TypeError()
+
+        msg_type, msg_data = self.__s.send_msg(
+            'PO_PORTAL_ADD_SERVICE_REQ', add_service_req
+        )
+        add_service_res = msg.AddServiceRes()
+        add_service_res.ParseFromString(msg_data)
+        return add_service_res
+
+    def delete_service(self, service_id):
+        del_service_req = msg.DelServiceReq()
+        del_service_req.service_id = service_id
+        msg_type, msg_data = self.__s.send_msg(
+            'PO_PORTAL_DEL_SERVICE_REQ', del_service_req
+        )
+        del_service_res = msg.DelServiceRes()
+        del_service_res.ParseFromString(msg_data)
+        return del_service_res
+
+    def list_services(self):
+        msg_type, msg_data = self.__s.send_msg(
+            'PO_PORTAL_LIST_SERVICES_REQ'
+        )
+        list_services_res = msg.ListServicesRes()
+        list_services_res.ParseFromString(msg_data)
+        return list_services_res
+
+    def list_services_details(self):
+        msg_type, msg_data = self.__s.send_msg(
+            'PO_PORTAL_LIST_SERVICES_DETAIL_REQ'
+        )
+        services_detail_res = msg.ServiceSyncData()
+        services_detail_res.ParseFromString(msg_data)
+        return services_detail_res
+
 
 

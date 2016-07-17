@@ -229,3 +229,78 @@ def do_upgrade(uniq_id):
         LOG.exception(e)
         return gen_result(rc=1, msg="RPC error")
     return gen_result()
+
+
+@portal_page.route('/services.html', methods=['GET'])
+@except_wrap
+@login_required
+def show_services_page():
+    services_list = ProtobufProxy().list_services()
+    __check_rpc_status(services_list, 'ProtobufProxy().services_list()')
+    return render_template('services.html', resource_class='services',
+                           services_list=services_list)
+
+
+@portal_page.route('/services/add', methods=['POST'])
+@except_wrap
+@login_required
+def do_add_service():
+    request_json = request.form.get('request_json', None)
+
+    try:
+        request_data = json.loads(request_json)
+    except Exception as e:
+        LOG.exception(e)
+        return gen_result(rc=1, msg="invalid json")
+
+    try:
+        add_result = ProtobufProxy().add_service(
+            request_data.get('app_id', -1),
+            request_data.get('service_type', ''),
+            request_data.get('service_port', -1),
+            request_data.get('private_port', -1),
+        )
+        __check_rpc_status(add_result, 'ProtobufProxy().add_service()')
+    except TypeError as e:
+        LOG.exception(e)
+        return gen_result(rc=1, msg="JSON content error")
+    except RPCContentException as e:
+        LOG.exception(e)
+        return gen_result(rc=1, msg=e.args[0])
+    except Exception as e:
+        LOG.exception(e)
+        return gen_result(rc=1, msg="RPC error")
+    return gen_result()
+
+
+@portal_page.route('/services/remove/<service_id>', methods=['POST'])
+@except_wrap
+@login_required
+def do_service_remove(service_id):
+    try:
+        remove_result = ProtobufProxy().delete_service(int(service_id))
+        __check_rpc_status(remove_result, 'ProtobufProxy().delete_service()')
+    except RPCContentException as e:
+        LOG.exception(e)
+        return gen_result(rc=1, msg=e.args[0])
+    except Exception as e:
+        LOG.exception(e)
+        return gen_result(rc=1, msg="RPC error")
+    return gen_result()
+
+
+@portal_page.route('/services/detail/<service_id>', methods=['GET'])
+@except_wrap
+@login_required
+def show_service_detail_page(service_id):
+    services_detail = ProtobufProxy().list_services_details()
+    __check_rpc_status(services_detail,
+                       'ProtobufProxy().list_services_details()')
+    service = None
+    for s in services_detail.infos:
+        if s.service_id == int(service_id):
+            service = s
+            break
+    return render_template('services_detail.html',
+                           resource_class='services',
+                           services_details=s)

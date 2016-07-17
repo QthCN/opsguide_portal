@@ -1,0 +1,21 @@
+{%extends "base.html"%}
+{%block title%}服务管理<small> 服务详情</small>{%endblock%}
+{%block js%}{%endblock%}
+{%block content%}
+<table class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th class="col-md-8">服务主机IP</th>
+            <th class="col-md-4">本地端口</th>
+        </tr>
+    </thead>
+    <tbody>
+        {%for s in services_details.items%}
+            <tr>
+                <td>{{s.ma_ip}}</td>
+                <td>{{s.public_port}}</td>
+            </tr>
+        {%endfor%}
+    </tbody>
+</table>
+{%endblock%}

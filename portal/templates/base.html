@@ -40,11 +40,19 @@
     <div class="container-fluid">
       <div class="row">
         <div class="col-sm-3 col-md-2 sidebar">
+
           <ul class="nav nav-sidebar">
             <li {% if resource_class=="overview" %} class="active" {% endif %}><a href="/">概览</a></li>
+          </ul>
+
+          <ul class="nav nav-sidebar">
             <li {% if resource_class=="pubmgr" %} class="active" {% endif %}><a href="/pubmgr.html">发布管理</a></li>
             <li {% if resource_class=="appsinfo" %} class="active" {% endif %}><a href="/appsinfo.html">应用信息</a></li>
             <li {% if resource_class=="agentsinfo" %} class="active" {% endif %}><a href="/agentsinfo.html">代理信息</a></li>
+          </ul>
+
+          <ul class="nav nav-sidebar">
+            <li {% if resource_class=="services" %} class="active" {% endif %}><a href="/services.html">服务管理</a></li>
           </ul>
         </div>
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">

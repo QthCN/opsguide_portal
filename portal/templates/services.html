@@ -1,0 +1,92 @@
+{%extends "base.html"%}
+{%block title%}服务管理{%endblock%}
+{%block third_js%}
+<script src="{{url_for('static', filename='js/bootbox.min.js')}}"></script>
+{%endblock%}
+{%block js%}
+function do_add() {
+    var request_json = $('#add_input_json').val();
+    $.post('/services/add', {request_json: request_json})
+     .done(function(result) {
+               result = JSON.parse(result);
+               if (result.rc==0) {
+                   window.location.href='/services.html';
+               } else {
+                   alert(result.msg);
+               }
+           })
+     .fail(
+         function() {
+            alert('请求发生错误，请重试或联系管理员排查');
+         }
+     );
+}
+
+function confirm_remove(service_id) {
+    bootbox.confirm("确定要删除该服务?", function(result) {
+        if (result) {
+            $.post('/services/remove/' + service_id, {})
+                 .done(function(result) {
+                           result = JSON.parse(result);
+                           if (result.rc==0) {
+                               window.location.href='/services.html';
+                           } else {
+                               alert(result.msg);
+                           }
+                       })
+                 .fail(
+                     function() {
+                        alert('请求发生错误，请重试或联系管理员排查');
+                     }
+                 );
+        }
+    });
+}
+{%endblock%}
+{%block content%}
+<ul class="nav nav-tabs">
+  <li role="presentation" class="active"><a data-toggle="tab" href="#service_list">服务列表</a></li>
+  <li role="presentation"><a data-toggle="tab" href="#add_service">添加服务</a></li>
+</ul>
+
+<div id="tab-content" class="tab-content">
+    <div class="tab-pane active" id="service_list">
+        <br/>
+        <table class="table table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th class="col-md-1">ID</th>
+                    <th class="col-md-2">应用名</th>
+                    <th class="col-md-2">类型</th>
+                    <th class="col-md-2">访问端口</th>
+                    <th class="col-md-2">本地端口</th>
+                    <th class="col-md-3">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {%for s in services_list.services%}
+                    <tr>
+                        <td>{{s.id}}</td>
+                        <td>{{s.app_name}}</td>
+                        <td>{{s.service_type}}</td>
+                        <td>{{s.service_port}}</td>
+                        <td>{{s.private_port}}</td>
+                        <td><a href="javascript:void(0)" onclick="confirm_remove({{s.id}})">删除</a> | <a href="/services/detail/{{s.id}}">详情</a></td>
+                    </tr>
+                {%endfor%}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="tab-pane" id="add_service">
+        <br/>
+        <form>
+          <div class="form-group">
+            <label for="add_input_json">请求JSON</label>
+            <textarea class="form-control" id="add_input_json" rows="20"></textarea>
+          </div>
+        </form>
+        <button class="btn btn-default" onclick="do_add()">添加</button>
+    </div>
+</div>
+{%endblock%}
