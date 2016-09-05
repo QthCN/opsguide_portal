@@ -304,3 +304,56 @@ def show_service_detail_page(service_id):
     return render_template('services_detail.html',
                            resource_class='services',
                            services_details=s)
+
+
+@portal_page.route('/cfgs.html', methods=['GET'])
+@except_wrap
+@login_required
+def show_cfgs_page():
+    cfg_list = ProtobufProxy().list_appcfgs()
+    __check_rpc_status(cfg_list, 'ProtobufProxy().list_appcfgs()')
+    applications = ProtobufProxy().list_applications()
+    __check_rpc_status(applications, 'ProtobufProxy().list_applications()')
+    return render_template('cfgs.html', resource_class='cfgs',
+                           cfg_list=cfg_list, applications=applications)
+
+
+@portal_page.route('/cfgs/update', methods=['POST'])
+@except_wrap
+@login_required
+def do_update_cfgs():
+    content = request.form.get('content', None)
+    app_id = request.form.get('app_id', None)
+    path = request.form.get('path', None)
+
+    try:
+        app_id = int(app_id)
+    except Exception as e:
+        LOG.exception(e)
+        return gen_result(rc=1, msg="invalid app_id")
+
+    try:
+        update_result = ProtobufProxy().update_appcfg(app_id, path, content)
+        __check_rpc_status(update_result, 'ProtobufProxy().update_appcfg()')
+    except RPCContentException as e:
+        LOG.exception(e)
+        return gen_result(rc=1, msg=e.args[0])
+    except Exception as e:
+        LOG.exception(e)
+        return gen_result(rc=1, msg="RPC error")
+    return gen_result()
+
+
+@portal_page.route('/cfgs/content/<app_name>', methods=['GET'])
+@except_wrap
+@login_required
+def show_cfg_content_page(app_name):
+    content = u'未找到应用对应的配置文件信息'
+    cfg_list = ProtobufProxy().list_appcfgs()
+    __check_rpc_status(cfg_list, 'ProtobufProxy().list_appcfgs()')
+    for cfg in cfg_list.cfgs:
+        if cfg.app_name == app_name:
+            content = cfg.content
+            break
+    return render_template('cfg_content.html', resource_class='cfgs',
+                           content=content)

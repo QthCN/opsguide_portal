@@ -1,0 +1,78 @@
+{%extends "base.html"%}
+{%block title%}配置管理{%endblock%}
+{%block third_js%}
+{%endblock%}
+{%block js%}
+function do_update() {
+    var cfg_content = $('#cfg_content').val();
+    var request_app_id = $('#app_id').val();
+    var path = $('#cfg_path').val();
+    $.post('/cfgs/update', {content: cfg_content, app_id: request_app_id, path: path})
+     .done(function(result) {
+               result = JSON.parse(result);
+               if (result.rc==0) {
+                   window.location.href='/cfgs.html';
+               } else {
+                   alert(result.msg);
+               }
+           })
+     .fail(
+         function() {
+            alert('请求发生错误，请重试或联系管理员排查');
+         }
+     );
+}
+{%endblock%}
+{%block content%}
+<ul class="nav nav-tabs">
+  <li role="presentation" class="active"><a data-toggle="tab" href="#cfg_list">配置列表</a></li>
+  <li role="presentation"><a data-toggle="tab" href="#update_cfg">更新配置</a></li>
+</ul>
+
+<div id="tab-content" class="tab-content">
+    <div class="tab-pane active" id="cfg_list">
+        <br/>
+        <table class="table table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th class="col-md-1">应用名</th>
+                    <th class="col-md-9">路径</th>
+                    <th class="col-md-2">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {%for c in cfg_list.cfgs%}
+                    <tr>
+                        <td>{{c.app_name}}</td>
+                        <td>{{c.path}}</td>
+                        <td><a href="/cfgs/content/{{c.app_name}}">配置内容</a></td>
+                    </tr>
+                {%endfor%}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="tab-pane" id="update_cfg">
+        <br/>
+        <form>
+          <div class="form-group">
+            <label for="app_id">应用名</label>
+            <select id="app_id">
+                {%for app in applications.applications%}
+                    <option value="{{app.id}}">{{app.name}}</option>
+                {%endfor%}
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="cfg_path">配置文件路径</label>
+            <input type="text" style="width:500px;display:inline-block" id="cfg_path"></input>
+          </div>
+          <div class="form-group">
+            <label for="cfg_content">配置文件内容</label>
+            <textarea class="form-control" id="cfg_content" rows="20"></textarea>
+          </div>
+        </form>
+        <button class="btn btn-default" onclick="do_update()">更新</button>
+    </div>
+</div>
+{%endblock%}

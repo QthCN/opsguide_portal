@@ -139,5 +139,27 @@ class ProtobufProxy(object):
         services_detail_res.ParseFromString(msg_data)
         return services_detail_res
 
+    def list_appcfgs(self):
+        msg_type, msg_data = self.__s.send_msg(
+            'PO_PORTAL_LIST_APP_CFG_REQ'
+        )
+        list_appcfgs_res = msg.DASyncAppsCFGRes()
+        list_appcfgs_res.ParseFromString(msg_data)
+        return list_appcfgs_res
+
+    def update_appcfg(self, app_id, path, content):
+        update_appcfg_req = msg.PortalUpdateAppCFGReq()
+        update_appcfg_req.app_id = int(app_id)
+        update_appcfg_req.path = path
+        update_appcfg_req.content = content
+        msg_type, msg_data = self.__s.send_msg(
+            'PO_PORTAL_UPDATE_APP_CFG_REQ', update_appcfg_req
+        )
+        update_appcfg_res = msg.PortalUpdateAppCFGRes()
+        update_appcfg_res.ParseFromString(msg_data)
+        return update_appcfg_res
+
+
+
 
 

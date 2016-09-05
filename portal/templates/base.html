@@ -54,6 +54,10 @@
           <ul class="nav nav-sidebar">
             <li {% if resource_class=="services" %} class="active" {% endif %}><a href="/services.html">服务管理</a></li>
           </ul>
+
+          <ul class="nav nav-sidebar">
+            <li {% if resource_class=="cfgs" %} class="active" {% endif %}><a href="/cfgs.html">配置管理</a></li>
+          </ul>
         </div>
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
           <h1 class="page-header">{%block title%}概览{%endblock%}</h1>
